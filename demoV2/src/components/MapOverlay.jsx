@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Polyline, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -26,7 +26,7 @@ function ChangeView({ center }) {
     return null;
 }
 
-const MapOverlay = ({ children, isRestricted, loading, location }) => {
+const MapOverlay = ({ children, isRestricted, loading, location, routes = [], selectedRouteId, onRouteClick }) => {
     const mapCenter = location ? [location.latitude, location.longitude] : [34.0522, -118.2437]; // Default LA
 
     return (
@@ -45,6 +45,23 @@ const MapOverlay = ({ children, isRestricted, loading, location }) => {
                         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
                     />
                     {location && <Marker position={mapCenter} />}
+
+                    {routes.map((route) => (
+                        <Polyline
+                            key={route.id}
+                            positions={route.geometry.coordinates.map(coord => [coord[1], coord[0]])}
+                            pathOptions={{
+                                color: route.id === selectedRouteId ? '#6366f1' : '#94a3b8',
+                                weight: route.id === selectedRouteId ? 6 : 4,
+                                opacity: route.id === selectedRouteId ? 1 : 0.6,
+                                lineJoin: 'round'
+                            }}
+                            eventHandlers={{
+                                click: () => onRouteClick && onRouteClick(route.id)
+                            }}
+                        />
+                    ))}
+
                     <ChangeView center={mapCenter} />
                 </MapContainer>
                 {isRestricted && <div className="hazard-overlay-layer"></div>}
