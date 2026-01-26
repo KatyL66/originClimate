@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { DEMO_ZIP_SCENARIOS } from './demoZipScenarios';
 
 export const useLocation = () => {
   const [location, setLocation] = useState(null);
@@ -35,6 +36,18 @@ export const useLocation = () => {
   const getCoordsFromZip = useCallback(async (zip) => {
     setLoading(true);
     try {
+      if (DEMO_ZIP_SCENARIOS[zip]) {
+      const demoLoc = {
+        latitude: DEMO_ZIP_SCENARIOS[zip].latitude,
+        longitude: DEMO_ZIP_SCENARIOS[zip].longitude,
+        zip_code: zip,
+      };
+      setLocation(demoLoc);
+      setLoading(false);
+      return demoLoc;
+    }
+
+
       const response = await fetch(`https://api.zippopotam.us/us/${zip}`);
       if (!response.ok) throw new Error('Invalid ZIP code');
       const data = await response.json();
