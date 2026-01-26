@@ -3,6 +3,7 @@ import { useLocation } from './modules/location/useLocation';
 import { fetchHazards } from './modules/hazard/hazardService';
 import { checkTrigger } from './modules/logic/triggerLogic';
 import { generateAdvice } from './modules/advice/adviceService';
+import { enhanceAdviceForDemo } from './modules/advice/demoAdvice';
 import './index.css';
 
 function App() {
@@ -26,7 +27,11 @@ function App() {
 
     const { trigger_alert, alerts } = checkTrigger(data);
     if (trigger_alert) {
-      const advice = await generateAdvice(alerts[0]);
+      let advice = await generateAdvice(alerts[0]);
+
+      if (location.isDemo) {
+        advice = enhanceAdviceForDemo(advice, location, alerts[0]);
+    }
       setAlert(advice);
     } else {
       setAlert(null);
@@ -89,9 +94,24 @@ function App() {
 
                 <div className="advice-section">
                   <h3>Avoid:</h3>
+
                   <ul>
-                    {alert.avoid.map((item, i) => <li key={i}>{item}</li>)}
+                    {(Array.isArray(alert.avoid)
+                      ? alert.avoid
+                      : alert.avoid?.list || []
+                    ).map((item, i) => (
+                      <li key={i}>{item}</li>
+                    ))}
                   </ul>
+
+                  {alert.avoid?.mapRegion && (
+                    <div className="embedded-map">
+                      <div className="map-header">Areas to avoid nearby</div>
+                      <div className="map-placeholder">
+                        {/* Map goes here later */}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="advice-section">
@@ -105,6 +125,27 @@ function App() {
                   <h3>Why this matters:</h3>
                   <p>{alert.why}</p>
                 </div>
+
+                {alert.resources && (
+                  <div className="advice-section resources">
+                    <h3>Resources</h3>
+
+                    {Object.entries(alert.resources).map(([group, items]) => (
+                      <div key={group} className="resource-group">
+                        <h4>{group.charAt(0).toUpperCase() + group.slice(1)}</h4>
+                        <ul>
+                          {items.map((r, i) => (
+                            <li key={i}>
+                              <a href={r.url} target="_blank" rel="noopener noreferrer">
+                                {r.label}
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
                 <button className="btn-primary" onClick={reset} style={{ marginTop: '2rem', width: '100%' }}>
                   Check Another Location

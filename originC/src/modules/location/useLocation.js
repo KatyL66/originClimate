@@ -19,6 +19,7 @@ export const useLocation = () => {
           const newLoc = {
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,
+            isDemo: false
           };
           setLocation(newLoc);
           setLoading(false);
@@ -41,6 +42,7 @@ export const useLocation = () => {
         latitude: DEMO_ZIP_SCENARIOS[zip].latitude,
         longitude: DEMO_ZIP_SCENARIOS[zip].longitude,
         zip_code: zip,
+        isDemo: true
       };
       setLocation(demoLoc);
       setLoading(false);
@@ -55,6 +57,7 @@ export const useLocation = () => {
         latitude: parseFloat(data.places[0].latitude),
         longitude: parseFloat(data.places[0].longitude),
         zip_code: zip,
+        isDemo: false
       };
       setLocation(newLoc);
       setLoading(false);
